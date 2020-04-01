@@ -3,7 +3,8 @@
 use serde::{ser, Serialize};
 use std::io::{Read, Write, Seek};
 
-use crate::error::{Error, Result};
+use crate::error::{Error, Result, ResultExt};
+use crate::cmd;
 
 pub trait Buffer: Read + Write + Seek + Send + Sync + 'static { }
 
@@ -19,6 +20,10 @@ impl Serializer {
         Serializer {
             buf: Box::new(buf),
         }
+    }
+
+    fn write(&mut self, v: impl Serialize) -> Result<()> {
+        Ok(serde_json::to_writer_pretty(&mut self.buf, &v).e()?)
     }
 }
 
@@ -175,10 +180,13 @@ impl<'a> ser::Serializer for &'a mut Serializer {
 
     fn serialize_struct(
         self,
-        _name: &'static str,
+        name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct> {
-        panic!()
+        self.write(cmd::SerializeStruct {
+            name, len
+        })?;
+        Ok(self)
     }
 
     fn serialize_struct_variant(

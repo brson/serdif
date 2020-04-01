@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate serde_derive;
-
 use serde::Serialize;
 use anyhow::Result;
 use std::io::Cursor;

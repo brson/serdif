@@ -1,5 +1,6 @@
 use std;
 use std::fmt::{self, Display};
+use std::error::Error as StdError;
 
 use serde::{de, ser};
 
@@ -26,5 +27,17 @@ impl Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl StdError for Error {}
 
+use std::result::Result as StdResult;
+
+pub trait ResultExt<T> {
+    fn e(self) -> StdResult<T, Error>;
+}
+
+impl<T, E> ResultExt<T> for StdResult<T, E>
+where E: StdError + Send + Sync + 'static {
+    fn e(self) -> StdResult<T, Error> {
+        self.map_err(|e| Error(anyhow::Error::new(e)))
+    }
+}
