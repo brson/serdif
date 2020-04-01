@@ -2,6 +2,7 @@ mod de;
 mod error;
 mod ser;
 
+mod state;
 mod cmd;
 
 pub use de::{Deserializer};

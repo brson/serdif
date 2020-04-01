@@ -1,29 +1,26 @@
 #![allow(unused)]
 
 use serde::{ser, Serialize};
-use std::io::{Read, Write, Seek};
 
 use crate::error::{Error, Result, ResultExt};
 use crate::cmd;
-
-pub trait Buffer: Read + Write + Seek + Send + Sync + 'static { }
-
-impl<T> Buffer for T
-where T: Read + Write + Seek + Send + Sync + 'static { }
+use crate::state::{State, Buffer};
 
 pub struct Serializer {
-    buf: Box<dyn Buffer>,
+    state: State,
 }
 
 impl Serializer {
     pub fn new(buf: impl Buffer) -> Serializer {
         Serializer {
-            buf: Box::new(buf),
+            state: State {
+                buf: Box::new(buf),
+            }
         }
     }
 
     fn write(&mut self, v: impl Serialize) -> Result<()> {
-        Ok(serde_json::to_writer_pretty(&mut self.buf, &v).e()?)
+        Ok(serde_json::to_writer_pretty(&mut self.state.buf, &v).e()?)
     }
 }
 
