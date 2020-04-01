@@ -3,7 +3,8 @@ mod error;
 mod ser;
 
 mod state;
-mod cmd;
+mod scmd;
+mod dcmd;
 
 pub use de::{Deserializer};
 pub use error::{Error, Result};

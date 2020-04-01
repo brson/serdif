@@ -3,7 +3,7 @@
 use serde::{ser, Serialize};
 
 use crate::error::{Error, Result, ResultExt};
-use crate::cmd;
+use crate::scmd;
 use crate::state::{State, Buffer};
 
 use crate::de::Deserializer;
@@ -192,7 +192,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct> {
-        self.write(cmd::SerializeStruct {
+        self.write(scmd::SerializeStruct {
             name, len
         })?;
         Ok(self)
@@ -307,14 +307,14 @@ impl<'a> ser::SerializeStruct for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        self.write(cmd::SerializeField {
+        self.write(scmd::SerializeField {
             key, value
         })?;
         Ok(())
     }
 
     fn end(self) -> Result<()> {
-        self.write(cmd::SerializeStructEnd)?;
+        self.write(scmd::SerializeStructEnd)?;
         Ok(())
     }
 }

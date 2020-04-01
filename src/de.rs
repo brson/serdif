@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 use crate::error::{Error, Result, ResultExt};
-use crate::cmd;
+use crate::dcmd;
 use crate::state::{State, Buffer};
 
 use std::ops::{AddAssign, MulAssign, Neg};
