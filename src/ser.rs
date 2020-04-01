@@ -298,11 +298,15 @@ impl<'a> ser::SerializeStruct for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        panic!()
+        self.write(cmd::SerializeField {
+            key, value
+        })?;
+        Ok(())
     }
 
     fn end(self) -> Result<()> {
-        panic!()
+        self.write(cmd::SerializeStructEnd)?;
+        Ok(())
     }
 }
 
