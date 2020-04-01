@@ -6,17 +6,29 @@ use crate::error::{Error, Result, ResultExt};
 use crate::cmd;
 use crate::state::{State, Buffer};
 
+use crate::de::Deserializer;
+
 pub struct Serializer {
     state: State,
 }
 
 impl Serializer {
     pub fn new(buf: impl Buffer) -> Serializer {
-        Serializer {
-            state: State {
-                buf: Box::new(buf),
-            }
-        }
+        Serializer::from_state(State {
+            buf: Box::new(buf),
+        })
+    }
+
+    pub fn from_state(state: State) -> Serializer {
+        Serializer { state }
+    }
+
+    pub fn to_state(self) -> State {
+        self.state
+    }
+
+    pub fn to_de(self) -> Deserializer {
+        Deserializer::from_state(self.to_state())
     }
 
     fn write(&mut self, v: impl Serialize) -> Result<()> {

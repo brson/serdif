@@ -12,11 +12,30 @@ use serde::de::{
     VariantAccess, Visitor,
 };
 
+use crate::ser::Serializer;
+
 pub struct Deserializer {
     state: State,
 }
 
 impl Deserializer {
+    pub fn new(buf: impl Buffer) -> Deserializer {
+        Deserializer::from_state(State {
+            buf: Box::new(buf),
+        })
+    }
+
+    pub fn from_state(state: State) -> Deserializer {
+        Deserializer { state }
+    }
+
+    pub fn to_state(self) -> State {
+        self.state
+    }
+
+    pub fn to_ser(self) -> Serializer {
+        Serializer::from_state(self.to_state())
+    }
 }
 
 impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
