@@ -3,13 +3,14 @@
 use crate::error::{Error, Result, ResultExt};
 use crate::dcmd;
 use crate::state::{State, Buffer};
+use std::io::SeekFrom;
 
 use std::ops::{AddAssign, MulAssign, Neg};
 
 use serde::Deserialize;
 use serde::de::{
     self, DeserializeSeed, EnumAccess, IntoDeserializer, MapAccess, SeqAccess,
-    VariantAccess, Visitor,
+    VariantAccess, Visitor, DeserializeOwned
 };
 
 use crate::ser::Serializer;
@@ -35,6 +36,15 @@ impl Deserializer {
 
     pub fn to_ser(self) -> Serializer {
         Serializer::from_state(self.to_state())
+    }
+
+    pub fn reset(&mut self) -> Result<()> {
+        self.state.buf.seek(SeekFrom::Start(0)).e()?;
+        Ok(())
+    }
+
+    fn read<T: DeserializeOwned>(&mut self) -> Result<T> {
+        Ok(serde_json::from_reader(&mut self.state.buf).e()?)
     }
 }
 
@@ -238,6 +248,7 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
     where
         V: Visitor<'static>,
     {
+        let cmd = self.read::<dcmd::SerializeStruct>()?;
         panic!()
     }
 

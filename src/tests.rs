@@ -22,6 +22,7 @@ fn test() -> Result<()> {
     val1.serialize(&mut ser)?;
 
     let mut de = ser.to_de();
+    de.reset()?;
 
     let val2 = Type1::deserialize(&mut de)?;
 

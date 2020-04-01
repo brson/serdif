@@ -5,6 +5,7 @@ use serde::{ser, Serialize};
 use crate::error::{Error, Result, ResultExt};
 use crate::scmd;
 use crate::state::{State, Buffer};
+use std::io::SeekFrom;
 
 use crate::de::Deserializer;
 
@@ -29,6 +30,11 @@ impl Serializer {
 
     pub fn to_de(self) -> Deserializer {
         Deserializer::from_state(self.to_state())
+    }
+
+    pub fn reset(&mut self) -> Result<()> {
+        self.state.buf.seek(SeekFrom::Start(0)).e()?;
+        Ok(())
     }
 
     fn write(&mut self, v: impl Serialize) -> Result<()> {
