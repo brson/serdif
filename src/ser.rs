@@ -1,11 +1,25 @@
 #![allow(unused)]
 
 use serde::{ser, Serialize};
+use std::io::{Read, Write, Seek};
 
 use crate::error::{Error, Result};
 
+pub trait Buffer: Read + Write + Seek + Send + Sync + 'static { }
+
+impl<T> Buffer for T
+where T: Read + Write + Seek + Send + Sync + 'static { }
+
 pub struct Serializer {
-    output: String,
+    buf: Box<dyn Buffer>,
+}
+
+impl Serializer {
+    pub fn new(buf: impl Buffer) -> Serializer {
+        Serializer {
+            buf: Box::new(buf),
+        }
+    }
 }
 
 impl<'a> ser::Serializer for &'a mut Serializer {
