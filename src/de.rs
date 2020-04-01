@@ -44,7 +44,10 @@ impl Deserializer {
     }
 
     fn read<T: DeserializeOwned>(&mut self) -> Result<T> {
-        Ok(serde_json::from_reader(&mut self.state.buf).e()?)
+        let mut de = serde_json::Deserializer::from_reader(&mut self.state.buf);
+        let t = T::deserialize(&mut de).e()?;
+        Ok(t)
+        //Ok(serde_json::from_reader(&mut self.state.buf).e()?)
     }
 }
 
