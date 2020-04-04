@@ -242,10 +242,14 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        Ok(self.write(scmd::SerializeTupleElement { value })?)
+        println!("SerializeTuple::serialize_element");
+        self.write(scmd::SerializeTupleElement)?;
+        value.serialize(&mut **self)?;
+        Ok(())
     }
 
     fn end(self) -> Result<()> {
+        println!("SerializeTuple::end");
         Ok(self.write(scmd::SerializeTupleEnd)?)
     }
 }
@@ -316,9 +320,8 @@ impl<'a> ser::SerializeStruct for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        self.write(scmd::SerializeField {
-            key, value
-        })?;
+        self.write(scmd::SerializeStructField { key })?;
+        value.serialize(&mut **self)?;
         Ok(())
     }
 

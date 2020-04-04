@@ -1,13 +1,13 @@
 use crate::scmd;
-use serde::{Deserialize, Deserializer};
-use std::marker::PhantomData;
+use serde::Deserialize;
 
 pub use scmd::SerializeBool;
 pub use scmd::SerializeU8;
 
 pub use scmd::SerializeTuple;
+pub use scmd::SerializeTupleElement;
 
-pub struct SerializeTupleElement<'de, T>
+/*pub struct SerializeTupleElement<'de, T>
 where T: Deserialize<'de>
 {
     pub value: T,
@@ -25,7 +25,7 @@ where T: Deserialize<'de>,
             _phantom: PhantomData,
         })
     }
-}
+}*/
 
 pub use scmd::SerializeTupleEnd;
 
@@ -35,12 +35,9 @@ pub struct SerializeStruct {
     pub len: usize,
 }
 
-/*#[derive(Deserialize)]
-pub struct SerializeField<'a, T>
-where T: ?Sized + Deserialize<'a>
-{
+#[derive(Deserialize)]
+pub struct SerializeStructField {
     pub key: String,
-    pub value: T,
-}*/
+}
 
 pub use scmd::SerializeStructEnd;

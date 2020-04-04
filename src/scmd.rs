@@ -16,11 +16,7 @@ pub struct SerializeTuple {
 }
 
 #[derive(Serialize)]
-pub struct SerializeTupleElement<'a, T>
-where T: ?Sized + Serialize
-{
-    pub value: &'a T,
-}
+pub struct SerializeTupleElement;
 
 #[derive(Serialize, Deserialize)]
 pub struct SerializeTupleEnd;
@@ -32,11 +28,8 @@ pub struct SerializeStruct {
 }
 
 #[derive(Serialize)]
-pub struct SerializeField<'a, T>
-where T: ?Sized + Serialize
-{
+pub struct SerializeStructField {
     pub key: &'static str,
-    pub value: &'a T,
 }
 
 #[derive(Serialize, Deserialize)]

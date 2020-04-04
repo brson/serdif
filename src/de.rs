@@ -227,6 +227,7 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
         println!("deserialize_tuple");
         println!("len: {}", len);
         let cmd = self.read::<dcmd::SerializeTuple>()?;
+        assert_eq!(len, cmd.len);
         panic!()
     }
 
