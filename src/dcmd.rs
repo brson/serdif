@@ -1,6 +1,7 @@
 use crate::scmd;
 use serde::Deserialize;
 
+pub use scmd::SerializeBool;
 pub use scmd::SerializeU8;
 
 #[derive(Deserialize)]

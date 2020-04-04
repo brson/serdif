@@ -65,7 +65,9 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
     where
         V: Visitor<'static>,
     {
-        visitor.visit_bool(panic!())
+        println!("deserialize_bool");
+        let cmd = self.read::<dcmd::SerializeBool>()?;
+        visitor.visit_bool(cmd.v)
     }
 
     fn deserialize_i8<V>(self, visitor: V) -> Result<V::Value>

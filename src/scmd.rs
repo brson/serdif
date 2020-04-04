@@ -1,6 +1,11 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
+pub struct SerializeBool {
+    pub v: bool,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct SerializeU8 {
     pub v: u8,
 }

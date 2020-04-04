@@ -56,7 +56,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
-        panic!()
+        Ok(self.write(scmd::SerializeBool { v })?)
     }
 
     fn serialize_i8(self, v: i8) -> Result<()> {
@@ -76,9 +76,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
-        Ok(self.write(scmd::SerializeU8 {
-            v
-        })?)
+        Ok(self.write(scmd::SerializeU8 { v })?)
     }
 
     fn serialize_u16(self, v: u16) -> Result<()> {
