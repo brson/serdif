@@ -228,7 +228,41 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
         println!("len: {}", len);
         let cmd = self.read::<dcmd::SerializeTuple>()?;
         assert_eq!(len, cmd.len);
-        panic!()
+
+        struct Access<'a> {
+            de: &'a mut Deserializer,
+            len: usize,
+        }
+
+        impl<'a> de::SeqAccess<'static> for Access<'a> {
+            type Error = Error;
+
+            fn next_element_seed<T>(&mut self, seed: T)
+                                    -> Result<Option<T::Value>>
+            where T: de::DeserializeSeed<'static>,
+            {
+                println!("next_element_seed(tuple)");
+                if self.len > 0 {
+                    let cmd = self.de.read::<dcmd::SerializeTupleElement>()?;
+                    self.len -= 1;
+                    let value =
+                        de::DeserializeSeed::deserialize(seed, &mut *self.de)?;
+                    Ok(Some(value))
+                } else {
+                    let cmd = self.de.read::<dcmd::SerializeTupleEnd>()?;
+                    Ok(None)
+                }
+            }
+
+            fn size_hint(&self) -> Option<usize> {
+                Some(self.len)
+            }
+        }
+
+        visitor.visit_seq(Access {
+            de: self,
+            len,
+        })
     }
 
     fn deserialize_tuple_struct<V>(

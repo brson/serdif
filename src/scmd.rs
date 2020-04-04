@@ -15,7 +15,7 @@ pub struct SerializeTuple {
     pub len: usize,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SerializeTupleElement;
 
 #[derive(Serialize, Deserialize)]
