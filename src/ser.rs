@@ -56,6 +56,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
+        println!("serialize_bool");
         Ok(self.write(scmd::SerializeBool { v })?)
     }
 
@@ -76,6 +77,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
+        println!("serialize_u8");
         Ok(self.write(scmd::SerializeU8 { v })?)
     }
 
@@ -168,7 +170,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple> {
-        panic!()
+        println!("serialize_tuple");
+        self.write(scmd::SerializeTuple { len })?;
+        Ok(self)
     }
 
     fn serialize_tuple_struct(
@@ -198,9 +202,8 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         name: &'static str,
         len: usize,
     ) -> Result<Self::SerializeStruct> {
-        self.write(scmd::SerializeStruct {
-            name, len
-        })?;
+        println!("serialize_struct");
+        self.write(scmd::SerializeStruct { name, len })?;
         Ok(self)
     }
 
@@ -239,7 +242,7 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        panic!()
+        Ok(self.write(scmd::SerializeTupleElement { value })?)
     }
 
     fn end(self) -> Result<()> {

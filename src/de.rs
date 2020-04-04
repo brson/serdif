@@ -220,10 +220,13 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
         panic!()
     }
 
-    fn deserialize_tuple<V>(self, _len: usize, visitor: V) -> Result<V::Value>
+    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'static>,
     {
+        println!("deserialize_tuple");
+        println!("len: {}", len);
+        let cmd = self.read::<dcmd::SerializeTuple>()?;
         panic!()
     }
 

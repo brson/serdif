@@ -10,6 +10,18 @@ pub struct SerializeU8 {
     pub v: u8,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct SerializeTuple {
+    pub len: usize,
+}
+
+#[derive(Serialize)]
+pub struct SerializeTupleElement<'a, T>
+where T: ?Sized + Serialize
+{
+    pub value: &'a T,
+}
+
 #[derive(Serialize)]
 pub struct SerializeStruct {
     pub name: &'static str,

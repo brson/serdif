@@ -44,6 +44,24 @@ fn test_bool() -> Result<()> {
 }
 
 #[test]
+fn test_tuple() -> Result<()> {
+    let buf = buffer();
+    let mut ser = Serializer::new(buf);
+
+    let val1 = (true, false);
+    val1.serialize(&mut ser)?;
+
+    let mut de = ser.to_de();
+    de.reset()?;
+
+    let val2 = <(bool, bool)>::deserialize(&mut de)?;
+
+    assert_eq!(val1, val2);
+
+    Ok(())
+}
+
+#[test]
 fn test_struct() -> Result<()> {
     let buf = buffer();
     let mut ser = Serializer::new(buf);
