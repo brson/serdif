@@ -246,7 +246,7 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        panic!()
+        Ok(self.write(scmd::SerializeTupleEnd)?)
     }
 }
 

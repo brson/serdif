@@ -27,6 +27,8 @@ where T: Deserialize<'de>,
     }
 }
 
+pub use scmd::SerializeTupleEnd;
+
 #[derive(Deserialize)]
 pub struct SerializeStruct {
     pub name: String,
@@ -41,5 +43,4 @@ where T: ?Sized + Deserialize<'a>
     pub value: T,
 }*/
 
-#[derive(Deserialize)]
-pub struct SerializeStructEnd;
+pub use scmd::SerializeStructEnd;

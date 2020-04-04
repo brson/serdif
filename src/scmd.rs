@@ -22,6 +22,9 @@ where T: ?Sized + Serialize
     pub value: &'a T,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct SerializeTupleEnd;
+
 #[derive(Serialize)]
 pub struct SerializeStruct {
     pub name: &'static str,
@@ -36,5 +39,5 @@ where T: ?Sized + Serialize
     pub value: &'a T,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct SerializeStructEnd;
