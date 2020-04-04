@@ -1,4 +1,9 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
+pub struct SerializeU8 {
+    pub v: u8,
+}
 
 #[derive(Serialize)]
 pub struct SerializeStruct {

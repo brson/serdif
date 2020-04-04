@@ -76,7 +76,9 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
-        panic!()
+        Ok(self.write(scmd::SerializeU8 {
+            v
+        })?)
     }
 
     fn serialize_u16(self, v: u16) -> Result<()> {

@@ -100,7 +100,9 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
     where
         V: Visitor<'static>,
     {
-        visitor.visit_u8(panic!())
+        println!("deserialize_u8");
+        let cmd = self.read::<dcmd::SerializeU8>()?;
+        visitor.visit_u8(cmd.v)
     }
 
     fn deserialize_u16<V>(self, visitor: V) -> Result<V::Value>
@@ -244,13 +246,16 @@ impl<'a> de::Deserializer<'static> for &'a mut Deserializer {
 
     fn deserialize_struct<V>(
         self,
-        _name: &'static str,
-        _fields: &'static [&'static str],
+        name: &'static str,
+        fields: &'static [&'static str],
         visitor: V,
     ) -> Result<V::Value>
     where
         V: Visitor<'static>,
     {
+        println!("deserialize_struct");
+        println!("name: {}", name);
+        println!("fields: {:#?}", fields);
         let cmd = self.read::<dcmd::SerializeStruct>()?;
         panic!()
     }

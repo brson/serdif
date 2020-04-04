@@ -1,4 +1,7 @@
+use crate::scmd;
 use serde::Deserialize;
+
+pub use scmd::SerializeU8;
 
 #[derive(Deserialize)]
 pub struct SerializeStruct {
