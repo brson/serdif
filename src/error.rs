@@ -29,6 +29,12 @@ impl Display for Error {
 
 impl StdError for Error {}
 
+impl From<anyhow::Error> for Error {
+    fn from(e: anyhow::Error) -> Error {
+        Error(e)
+    }
+}
+
 use std::result::Result as StdResult;
 
 pub trait StdResultExt<T> {

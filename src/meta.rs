@@ -1,9 +1,13 @@
 #![allow(unused)]
 
+use anyhow::{bail, anyhow};
 use crate::error::{Result, StdResultExt};
 use serde::{Serialize, Deserialize};
+use serde_json;
 use byteorder::{ByteOrder, LittleEndian};
 use hex;
+use std::io::SeekFrom;
+use crate::state::Buffer;
 
 #[derive(Debug)]
 pub struct Stitch {
@@ -56,3 +60,27 @@ pub struct Trailer {
     pub first_stitch: Option<u64>,
     pub prev_trailer_pos: Option<u64>,
 }
+
+fn find_last_trailer(buf: &mut dyn Buffer) -> Result<Option<(Trailer, u64)>> {
+    let orig_pos = buf.seek(SeekFrom::Current(0)).e()?;
+    let pos = buf.seek(SeekFrom::End(0)).e()?;
+    if pos == 0 {
+        return Ok(None);
+    }
+
+    for i in 0..1000 {
+        let pos = buf.seek(SeekFrom::End(i)).e()?;
+        let mut de = serde_json::Deserializer::from_reader(&mut *buf);
+        let t = Trailer::deserialize(&mut de);
+        if let Ok(t) = t {
+            if t.magic == MAGIC {
+                buf.seek(SeekFrom::Start(orig_pos)).e()?;
+                return Ok(Some((t, pos)));
+            }
+        }
+    }
+
+    buf.seek(SeekFrom::Start(orig_pos)).e()?;
+    Err(anyhow!("unable to find trailer block").into())
+}
+
