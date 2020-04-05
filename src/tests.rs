@@ -84,3 +84,26 @@ fn test_struct() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn test_overwrite_tuple() -> Result<()> {
+    let buf = buffer();
+    let mut ser = Serializer::new(buf);
+
+    let val1 = (true, false);
+    val1.serialize(&mut ser)?;
+
+    ser.reset()?;
+
+    let val2 = (false, true);
+    val2.serialize(&mut ser)?;
+
+    let mut de = ser.to_de();
+    de.reset()?;
+
+    let val3 = <(bool, bool)>::deserialize(&mut de)?;
+
+    assert_eq!(val2, val3);
+
+    Ok(())
+}
