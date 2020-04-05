@@ -10,13 +10,12 @@ fn buffer() -> Cursor<Vec<u8>> {
 #[test]
 fn test_u8() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     let val1 = 5u8;
     val1.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val2 = u8::deserialize(&mut de)?;
 
@@ -28,13 +27,12 @@ fn test_u8() -> Result<()> {
 #[test]
 fn test_bool() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     let val1 = true;
     val1.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val2 = bool::deserialize(&mut de)?;
 
@@ -46,13 +44,12 @@ fn test_bool() -> Result<()> {
 #[test]
 fn test_tuple() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     let val1 = (true, false);
     val1.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val2 = <(bool, bool)>::deserialize(&mut de)?;
 
@@ -65,7 +62,7 @@ fn test_tuple() -> Result<()> {
 #[ignore]
 fn test_struct() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     #[derive(Serialize, Deserialize, Eq, PartialEq, Debug)]
     struct Type1 {
@@ -76,8 +73,7 @@ fn test_struct() -> Result<()> {
     let val1 = Type1 { field1: true, field2: false };
     val1.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val2 = Type1::deserialize(&mut de)?;
 
@@ -89,7 +85,7 @@ fn test_struct() -> Result<()> {
 #[test]
 fn test_no_change_tuple() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     let val1 = (true, false);
     val1.serialize(&mut ser)?;
@@ -101,8 +97,7 @@ fn test_no_change_tuple() -> Result<()> {
     let val2 = (true, false);
     val2.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val3 = <(bool, bool)>::deserialize(&mut de)?;
 
@@ -114,7 +109,7 @@ fn test_no_change_tuple() -> Result<()> {
 #[test]
 fn test_diff_tuple() -> Result<()> {
     let buf = buffer();
-    let mut ser = Serializer::new(buf);
+    let mut ser = Serializer::new(buf)?;
 
     let val1 = (true, false);
     val1.serialize(&mut ser)?;
@@ -126,8 +121,7 @@ fn test_diff_tuple() -> Result<()> {
     let val2 = (false, true);
     val2.serialize(&mut ser)?;
 
-    let mut de = ser.to_de();
-    de.reset()?;
+    let mut de = ser.to_de()?;
 
     let val3 = <(bool, bool)>::deserialize(&mut de)?;
 

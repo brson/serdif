@@ -5,6 +5,7 @@ mod ser;
 mod state;
 mod scmd;
 mod dcmd;
+mod meta;
 
 pub use de::{Deserializer};
 pub use error::{Error, Result};

@@ -20,21 +20,23 @@ pub struct Deserializer {
 }
 
 impl Deserializer {
-    pub fn new(buf: impl Buffer) -> Deserializer {
+    pub fn new(buf: impl Buffer) -> Result<Deserializer> {
         Deserializer::from_state(State {
             buf: Box::new(buf),
         })
     }
 
-    pub fn from_state(state: State) -> Deserializer {
-        Deserializer { state }
+    pub fn from_state(state: State) -> Result<Deserializer> {
+        let mut v = Deserializer { state };
+        v.reset()?;
+        Ok(v)
     }
 
     pub fn to_state(self) -> State {
         self.state
     }
 
-    pub fn to_ser(self) -> Serializer {
+    pub fn to_ser(self) -> Result<Serializer> {
         Serializer::from_state(self.to_state())
     }
 

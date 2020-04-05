@@ -6,35 +6,47 @@ use crate::error::{Error, Result, ResultExt, StdResultExt};
 use crate::{scmd, dcmd};
 use crate::state::{State, Buffer};
 use std::io::SeekFrom;
+use crate::meta::{Stitch};
 
 use crate::de::Deserializer;
 use serde::de::DeserializeOwned;
 
 pub struct Serializer {
     state: State,
+    first_stitch_pos: u64,
+    new_stitches: u64,
 }
 
 impl Serializer {
-    pub fn new(buf: impl Buffer) -> Serializer {
+    pub fn new(buf: impl Buffer) -> Result<Serializer> {
         Serializer::from_state(State {
             buf: Box::new(buf),
         })
     }
 
-    pub fn from_state(state: State) -> Serializer {
-        Serializer { state }
+    pub fn from_state(state: State) -> Result<Serializer> {
+        let mut v = Serializer {
+            state,
+            first_stitch_pos: 0,
+            new_stitches: 0,
+        };
+        v.reset()?;
+        Ok(v)
     }
 
     pub fn to_state(self) -> State {
         self.state
     }
 
-    pub fn to_de(self) -> Deserializer {
+    pub fn to_de(self) -> Result<Deserializer> {
         Deserializer::from_state(self.to_state())
     }
 
     pub fn reset(&mut self) -> Result<()> {
+        let end_pos = self.state.buf.seek(SeekFrom::End(0)).e()?;
         self.state.buf.seek(SeekFrom::Start(0)).e()?;
+        self.first_stitch_pos = end_pos;
+        self.new_stitches = 0;
         Ok(())
     }
 
@@ -72,13 +84,36 @@ impl<'a> ser::Serializer for &'a mut Serializer {
             self.write(newcmd)?;
         } else {
             let oldcmd = oldcmd?;
-            if oldcmd != newcmd {
+            if oldcmd != newcmd && false {
+                // Save the stream position
                 let bookmark_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
-                let meta_pos = self.state.buf.seek(SeekFrom::End(0)).e()?;
-                //self.write(stitch_meta)?;
+                // Seek to the end
+                let stitch_pos = self.state.buf.seek(SeekFrom::End(0)).e()?;
+                // Write a placeholder stitch
+                let new_pos = 0;
+                let next_stitch_pos = 0;
+                let tmp_stitch = Stitch { old_pos, new_pos, next_stitch_pos };
+                let tmp_stitch = tmp_stitch.encode();
+                self.write(tmp_stitch)?;
+                // Write the command
                 let new_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
                 self.write(newcmd)?;
+                let next_stitch_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
+                // Backup and rewrite the real stitch
+                self.state.buf.seek(SeekFrom::Start(stitch_pos)).e()?;
+                let stitch = Stitch { old_pos, new_pos, next_stitch_pos };
+                let stitch = stitch.encode();
+                self.write(stitch)?;
+                // Verify the stitch size
+                let new_pos_2 = self.state.buf.seek(SeekFrom::Current(0)).e()?;
+                assert_eq!(new_pos, new_pos_2);
+                // Restore the original stream position
                 self.state.buf.seek(SeekFrom::Start(bookmark_pos)).e()?;
+                // Validate self.first_stitch_pos
+                self.new_stitches += 1;
+                if self.new_stitches == 1 {
+                    assert_eq!(self.first_stitch_pos, stitch_pos);
+                }
             }
         }
         Ok(())
