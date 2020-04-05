@@ -31,13 +31,32 @@ impl StdError for Error {}
 
 use std::result::Result as StdResult;
 
-pub trait ResultExt<T> {
+pub trait StdResultExt<T> {
     fn e(self) -> StdResult<T, Error>;
 }
 
-impl<T, E> ResultExt<T> for StdResult<T, E>
+impl<T, E> StdResultExt<T> for StdResult<T, E>
 where E: StdError + Send + Sync + 'static {
     fn e(self) -> StdResult<T, Error> {
         self.map_err(|e| Error(anyhow::Error::new(e)))
+    }
+}
+
+pub trait ResultExt {
+    fn cmd_eof(&self) -> bool;
+}
+
+impl<T> ResultExt for Result<T> {
+    fn cmd_eof(&self) -> bool {
+        match self {
+            Ok(_) => false,
+            Err(ref e) => {
+                if let Some(e) = e.0.downcast_ref::<serde_json::Error>() {
+                    e.is_eof()
+                } else {
+                    false
+                }
+            }
+        }
     }
 }

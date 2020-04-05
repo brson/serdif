@@ -2,12 +2,13 @@
 
 use serde::{ser, Serialize};
 
-use crate::error::{Error, Result, ResultExt};
-use crate::scmd;
+use crate::error::{Error, Result, ResultExt, StdResultExt};
+use crate::{scmd, dcmd};
 use crate::state::{State, Buffer};
 use std::io::SeekFrom;
 
 use crate::de::Deserializer;
+use serde::de::DeserializeOwned;
 
 pub struct Serializer {
     state: State,
@@ -39,6 +40,12 @@ impl Serializer {
 
     fn write(&mut self, v: impl Serialize) -> Result<()> {
         Ok(serde_json::to_writer_pretty(&mut self.state.buf, &v).e()?)
+    }
+
+    fn read<T: DeserializeOwned>(&mut self) -> Result<T> {
+        let mut de = serde_json::Deserializer::from_reader(&mut self.state.buf);
+        let t = T::deserialize(&mut de).e()?;
+        Ok(t)
     }
 }
 
@@ -170,8 +177,18 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple> {
-        println!("serialize_tuple");
-        self.write(scmd::SerializeTuple { len })?;
+        let newcmd = scmd::SerializeTuple { len };
+        println!("newcmd: {:?}", newcmd);
+        let oldcmd = self.read::<dcmd::SerializeTuple>();
+        println!("oldcmd: {:?}", oldcmd);
+        if oldcmd.cmd_eof() {
+            self.write(newcmd)?;
+        } else {
+            let oldcmd = oldcmd?;
+            if oldcmd != newcmd {
+                unimplemented!()
+            }
+        }
         Ok(self)
     }
 
@@ -242,9 +259,19 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     where
         T: ?Sized + Serialize,
     {
-        println!("SerializeTuple::serialize_element");
-        self.write(scmd::SerializeTupleElement)?;
-        value.serialize(&mut **self)?;
+        let newcmd = scmd::SerializeTupleElement;
+        println!("newcmd: {:?}", newcmd);
+        let oldcmd = self.read::<dcmd::SerializeTupleElement>();
+        println!("oldcmd: {:?}", oldcmd);
+        if oldcmd.cmd_eof() {
+            self.write(newcmd)?;
+            value.serialize(&mut **self)?;
+        } else {
+            let oldcmd = oldcmd?;
+            if oldcmd != newcmd {
+                unimplemented!()
+            }
+        }
         Ok(())
     }
 

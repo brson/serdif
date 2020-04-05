@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::error::{Error, Result, ResultExt};
+use crate::error::{Error, Result, StdResultExt};
 use crate::dcmd;
 use crate::state::{State, Buffer};
 use std::io::SeekFrom;
@@ -47,7 +47,6 @@ impl Deserializer {
         let mut de = serde_json::Deserializer::from_reader(&mut self.state.buf);
         let t = T::deserialize(&mut de).e()?;
         Ok(t)
-        //Ok(serde_json::from_reader(&mut self.state.buf).e()?)
     }
 }
 
