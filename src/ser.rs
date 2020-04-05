@@ -63,6 +63,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
+        let old_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
         let newcmd = scmd::SerializeBool { v };
         println!("newcmd: {:?}", newcmd);
         let oldcmd = self.read::<dcmd::SerializeBool>();
@@ -72,7 +73,12 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         } else {
             let oldcmd = oldcmd?;
             if oldcmd != newcmd {
-                unimplemented!()
+                let bookmark_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
+                let meta_pos = self.state.buf.seek(SeekFrom::End(0)).e()?;
+                //self.write(stitch_meta)?;
+                let new_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
+                self.write(newcmd)?;
+                self.state.buf.seek(SeekFrom::Start(bookmark_pos)).e()?;
             }
         }
         Ok(())
