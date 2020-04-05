@@ -5,7 +5,7 @@ use serde::{ser, Serialize};
 use crate::error::{Error, Result, ResultExt, StdResultExt};
 use crate::{scmd, dcmd};
 use crate::state::{State, Buffer};
-use std::io::SeekFrom;
+use std::io::{self, SeekFrom};
 use crate::meta::{Stitch, Trailer, MAGIC};
 
 use crate::de::Deserializer;
@@ -53,7 +53,9 @@ impl Serializer {
     }
 
     fn write(&mut self, v: impl Serialize) -> Result<()> {
-        Ok(serde_json::to_writer_pretty(&mut self.state.buf, &v).e()?)
+        serde_json::to_writer_pretty(&mut self.state.buf, &v).e()?;
+        writeln!(&mut self.state.buf).e()?;
+        Ok(())
     }
 
     fn read<T: DeserializeOwned>(&mut self) -> Result<T> {
@@ -63,6 +65,7 @@ impl Serializer {
     }
 
     pub fn finalize(&mut self) -> Result<()> {
+        self.state.buf.seek(SeekFrom::End(0)).e()?;
         let first_stitch = if self.new_stitches != 0 {
             Some(self.first_stitch_pos)
         } else {
@@ -79,7 +82,14 @@ impl Serializer {
     }
 
     pub fn dump(&mut self) -> Result<()> {
-        
+        println!("-- dump --");
+        let pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
+        self.state.buf.seek(SeekFrom::Start(0)).e()?;
+        let mut stdout = io::stdout();
+        io::copy(&mut self.state.buf, &mut stdout).e()?;
+        println!("-- dump --");
+        self.state.buf.seek(SeekFrom::Start(pos)).e()?;
+        Ok(())
     }
 }
 

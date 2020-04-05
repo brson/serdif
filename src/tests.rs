@@ -114,6 +114,7 @@ fn test_diff_tuple() -> Result<()> {
     let val1 = (true, false);
     val1.serialize(&mut ser)?;
     ser.finalize()?;
+    ser.dump()?;
 
     ser.reset()?;
 
@@ -122,6 +123,8 @@ fn test_diff_tuple() -> Result<()> {
     let val2 = (false, true);
     val2.serialize(&mut ser)?;
     ser.finalize()?;
+
+    ser.dump()?;
 
     let mut de = ser.to_de()?;
 
