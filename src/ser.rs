@@ -287,8 +287,19 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
     }
 
     fn end(self) -> Result<()> {
-        println!("SerializeTuple::end");
-        Ok(self.write(scmd::SerializeTupleEnd)?)
+        let newcmd = scmd::SerializeTupleEnd;
+        println!("newcmd: {:?}", newcmd);
+        let oldcmd = self.read::<dcmd::SerializeTupleEnd>();
+        println!("oldcmd: {:?}", oldcmd);
+        if oldcmd.cmd_eof() {
+            self.write(newcmd)?;
+        } else {
+            let oldcmd = oldcmd?;
+            if oldcmd != newcmd {
+                unimplemented!()
+            }
+        }
+        Ok(())
     }
 }
 

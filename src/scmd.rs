@@ -18,7 +18,7 @@ pub struct SerializeTuple {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct SerializeTupleElement;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub struct SerializeTupleEnd;
 
 #[derive(Serialize)]
