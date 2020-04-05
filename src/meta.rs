@@ -5,6 +5,7 @@ use serde::{Serialize, Deserialize};
 use byteorder::{ByteOrder, LittleEndian};
 use hex;
 
+#[derive(Debug)]
 pub struct Stitch {
     pub old_pos: u64,
     pub new_pos: u64,
@@ -26,7 +27,7 @@ impl Stitch {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FixedSizeStitch {
     old_pos: String,
     new_pos: String,
@@ -45,4 +46,13 @@ impl FixedSizeStitch {
             old_pos, new_pos, next_stitch_pos,
         })
     }
+}
+
+pub const MAGIC: u64 = 0x84124f4c417733f8;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Trailer {
+    pub magic: u64,
+    pub first_stitch: Option<u64>,
+    pub prev_trailer_pos: Option<u64>,
 }

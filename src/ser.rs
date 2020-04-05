@@ -6,7 +6,7 @@ use crate::error::{Error, Result, ResultExt, StdResultExt};
 use crate::{scmd, dcmd};
 use crate::state::{State, Buffer};
 use std::io::SeekFrom;
-use crate::meta::{Stitch};
+use crate::meta::{Stitch, Trailer, MAGIC};
 
 use crate::de::Deserializer;
 use serde::de::DeserializeOwned;
@@ -15,6 +15,7 @@ pub struct Serializer {
     state: State,
     first_stitch_pos: u64,
     new_stitches: u64,
+    last_trailer_pos: Option<u64>,
 }
 
 impl Serializer {
@@ -29,6 +30,7 @@ impl Serializer {
             state,
             first_stitch_pos: 0,
             new_stitches: 0,
+            last_trailer_pos: None,
         };
         v.reset()?;
         Ok(v)
@@ -59,6 +61,26 @@ impl Serializer {
         let t = T::deserialize(&mut de).e()?;
         Ok(t)
     }
+
+    pub fn finalize(&mut self) -> Result<()> {
+        let first_stitch = if self.new_stitches != 0 {
+            Some(self.first_stitch_pos)
+        } else {
+            None
+        };
+        let trailer = Trailer {
+            magic: MAGIC,
+            first_stitch,
+            prev_trailer_pos: self.last_trailer_pos,
+        };
+        println!("{:?}", trailer);
+        self.write(trailer)?;
+        Ok(())
+    }
+
+    pub fn dump(&mut self) -> Result<()> {
+        
+    }
 }
 
 impl<'a> ser::Serializer for &'a mut Serializer {
@@ -84,7 +106,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
             self.write(newcmd)?;
         } else {
             let oldcmd = oldcmd?;
-            if oldcmd != newcmd && false {
+            if oldcmd != newcmd {
                 // Save the stream position
                 let bookmark_pos = self.state.buf.seek(SeekFrom::Current(0)).e()?;
                 // Seek to the end
@@ -102,6 +124,7 @@ impl<'a> ser::Serializer for &'a mut Serializer {
                 // Backup and rewrite the real stitch
                 self.state.buf.seek(SeekFrom::Start(stitch_pos)).e()?;
                 let stitch = Stitch { old_pos, new_pos, next_stitch_pos };
+                println!("stitch: {:?}", stitch);
                 let stitch = stitch.encode();
                 self.write(stitch)?;
                 // Verify the stitch size
