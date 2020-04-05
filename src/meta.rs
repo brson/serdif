@@ -84,3 +84,25 @@ fn find_last_trailer(buf: &mut dyn Buffer) -> Result<Option<(Trailer, u64)>> {
     Err(anyhow!("unable to find trailer block").into())
 }
 
+fn find_trailers(buf: &mut dyn Buffer) -> Result<Option<(Vec<Trailer>, u64)>> {
+    if let Some((last_trailer, last_trailer_pos)) = find_last_trailer(&mut *buf)? {
+        let orig_pos = buf.seek(SeekFrom::Current(0)).e()?;
+        let mut cur_trailer = last_trailer;
+        let mut stack = Vec::new();
+        loop {
+            if let Some(prev_trailer_pos) = cur_trailer.prev_trailer_pos {
+                stack.push(cur_trailer);
+                buf.seek(SeekFrom::Start(prev_trailer_pos)).e()?;
+                let mut de = serde_json::Deserializer::from_reader(&mut *buf);
+                let prev_trailer = Trailer::deserialize(&mut de).e()?;
+                cur_trailer = prev_trailer;
+            } else {
+                stack.push(cur_trailer);
+                buf.seek(SeekFrom::Start(orig_pos)).e()?;
+                return Ok(Some((stack, last_trailer_pos)));
+            }
+        }
+    } else {
+        Ok(None)
+    }
+}

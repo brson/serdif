@@ -65,6 +65,12 @@ impl Serializer {
     }
 
     pub fn finalize(&mut self) -> Result<()> {
+        if self.new_stitches == 0 {
+            if self.last_trailer_pos.is_some() {
+                // No new data written
+                return Ok(());
+            }
+        }
         self.state.buf.seek(SeekFrom::End(0)).e()?;
         let first_stitch = if self.new_stitches != 0 {
             Some(self.first_stitch_pos)
