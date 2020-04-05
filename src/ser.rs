@@ -276,13 +276,13 @@ impl<'a> ser::SerializeTuple for &'a mut Serializer {
         println!("oldcmd: {:?}", oldcmd);
         if oldcmd.cmd_eof() {
             self.write(newcmd)?;
-            value.serialize(&mut **self)?;
         } else {
             let oldcmd = oldcmd?;
             if oldcmd != newcmd {
                 unimplemented!()
             }
         }
+        value.serialize(&mut **self)?;
         Ok(())
     }
 
