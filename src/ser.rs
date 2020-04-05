@@ -63,8 +63,19 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     type SerializeStructVariant = Self;
 
     fn serialize_bool(self, v: bool) -> Result<()> {
-        println!("serialize_bool");
-        Ok(self.write(scmd::SerializeBool { v })?)
+        let newcmd = scmd::SerializeBool { v };
+        println!("newcmd: {:?}", newcmd);
+        let oldcmd = self.read::<dcmd::SerializeBool>();
+        println!("oldcmd: {:?}", oldcmd);
+        if oldcmd.cmd_eof() {
+            self.write(newcmd)?;
+        } else {
+            let oldcmd = oldcmd?;
+            if oldcmd != newcmd {
+                unimplemented!()
+            }
+        }
+        Ok(())
     }
 
     fn serialize_i8(self, v: i8) -> Result<()> {
